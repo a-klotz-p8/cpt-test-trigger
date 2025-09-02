@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Webhook Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 2rem;
+        background: #f9f9f9;
+      }
+      .container {
+        max-width: 400px;
+        margin: auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      label {
+        display: block;
+        margin-top: 1rem;
+        font-weight: bold;
+      }
+      input {
+        width: 100%;
+        padding: 0.5rem;
+        margin-top: 0.25rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+      button {
+        margin-top: 1.5rem;
+        padding: 0.75rem;
+        width: 100%;
+        border: none;
+        border-radius: 8px;
+        background: #0078d7;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #005ea3;
+      }
+      .output {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        border-radius: 8px;
+        background: #f0f0f0;
+        white-space: pre-wrap;
+        font-family: monospace;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Webhook Tester</h2>
+      <label for="row">Row</label>
+      <input type="text" id="row" placeholder="Enter row" />
+
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Enter username" />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter password" />
+
+      <button id="testBtn">Test Webhook</button>
+
+      <div id="output" class="output"></div>
+    </div>
+
+    <script>
+      document.getElementById("testBtn").addEventListener("click", async () => {
+        const row = document.getElementById("row").value;
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const output = document.getElementById("output");
+
+        if (!row || !username || !password) {
+          output.textContent = "⚠️ Please fill in all fields.";
+          return;
+        }
+
+        const webhookUrl =
+          "https://workflows.p8.eu/webhook-test/2718983d-b62b-4a8d-a775-0b5fe8accb4c";
+        const authHeader = "Basic " + btoa(username + ":" + password);
+
+        try {
+          const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: {
+              Authorization: authHeader,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ row }),
+          });
+
+          const text = await response.text();
+          output.textContent = `✅ Status: ${response.status}\n\n${text}`;
+        } catch (err) {
+          output.textContent = "❌ Error: " + err.message;
+        }
+      });
+    </script>
+  </body>
+</html>
