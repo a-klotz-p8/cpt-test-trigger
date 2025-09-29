@@ -44,6 +44,10 @@
       button:hover {
         background: #005ea3;
       }
+      button:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+      }
       .output {
         margin-top: 1.5rem;
         padding: 1rem;
@@ -52,6 +56,25 @@
         white-space: pre-wrap;
         font-family: monospace;
         font-size: 0.9rem;
+      }
+      .loader {
+        display: inline-block;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #0078d7;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        animation: spin 1s linear infinite;
+        margin-left: 10px;
+        vertical-align: middle;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
@@ -76,12 +99,14 @@
     </div>
 
     <script>
-      document.getElementById("testBtn").addEventListener("click", async () => {
+      const testBtn = document.getElementById("testBtn");
+      const output = document.getElementById("output");
+
+      testBtn.addEventListener("click", async () => {
         const row = document.getElementById("row").value;
         const email = document.getElementById("email").value;
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
-        const output = document.getElementById("output");
 
         if (!row || !username || !password || !email) {
           output.textContent = "⚠️ Please fill in all fields.";
@@ -91,6 +116,13 @@
         const webhookUrl =
           "https://workflows.p8.eu/webhook/2718983d-b62b-4a8d-a775-0b5fe8accb4c";
         const authHeader = "Basic " + btoa(username + ":" + password);
+
+        // Show loader and disable button
+        testBtn.disabled = true;
+        const loader = document.createElement("span");
+        loader.className = "loader";
+        testBtn.appendChild(loader);
+        output.textContent = "⏳ Sending request...";
 
         try {
           const response = await fetch(webhookUrl, {
@@ -104,8 +136,15 @@
 
           const text = await response.text();
           output.textContent = `✅ Status: ${response.status}\n\n${text}`;
+
+          // Reset input fields
+          document.getElementById("row").value = "";
         } catch (err) {
           output.textContent = "❌ Error: " + err.message;
+        } finally {
+          // Remove loader and re-enable button
+          loader.remove();
+          testBtn.disabled = false;
         }
       });
     </script>
